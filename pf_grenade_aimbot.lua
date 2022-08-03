@@ -193,27 +193,24 @@ do -- network hook
 
                 local distances = { } do
                     for i = 1, 100 do
-                        local frames = cache.calculateFrames(CFrame.lookAt(framework.camera.basecframe.p, part.Position + Vector3.new(0, i, 0)))
-                        local distance = math.huge
-                        for _, v in next, frames do
-                            local magnitude = (part.Position - v.p0).magnitude
-                            if magnitude < distance then
-                                distance = magnitude
-                            end
-                        end
-                        distances[i] = distance
+                        local offset = Vector3.new(0, i, 0)
+                        local frames = cache.calculateFrames(CFrame.lookAt(framework.camera.basecframe.p, part.Position + offset))
+                        local magnitude = (part.Position - frames[#frames].p0).magnitude
+                        distances[i] = {
+                            distance = magnitude,
+                            offset = offset,
+                        }
                     end
                 end
 
-                local edx, idx = math.huge do
-                    for i, v in next, distances do
-                        if v < edx then
-                            edx = v
-                            idx = i
-                        end
+                local distance, offset = math.huge, Vector3.zero
+                for i, v in next, distances do
+                    if v.distance < distance then
+                        distance = v.distance
+                        offset = v.offset
                     end
                 end
-                local lookUnit = (part.Position + Vector3.new(0, idx, 0) - framework.camera.basecframe.Position).unit
+                local lookUnit = (part.Position + offset - framework.camera.basecframe.Position).unit
                 args[2] = lookUnit * 9e5
             end
         end
